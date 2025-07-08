@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <title>OilMesh | Rafineri, Liman ve Boru Hattı Haritası</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-search@3.0.9/dist/leaflet-search.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+
+  <style>
+    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    #map { width: 100vw; height: 100vh; box-sizing: border-box; }
+
+    /* HEADER STYLES */
+    .main-header {
+        background-color: #ffffff;
+        padding: 0 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: fixed; /* Sabit durması için */
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1001; /* Diğer elementlerin üzerinde kalması için */
+        box-sizing: border-box;
+    }
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+        height: 60px;
+    }
+    .brand-logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: #0056b3;
+        text-decoration: none;
+    }
+    .main-header nav a {
+        margin-left: 20px;
+        text-decoration: none;
+        color: #333;
+        font-size: 16px;
+        padding: 5px 10px;
+        border-radius: 5px;
+        transition: background-color 0.2s;
+    }
+    .main-header nav a:hover { background-color: #f0f0f0; }
+    .main-header nav a.active { font-weight: bold; color: #0056b3; }
+    
+    /* Haritanın menünün altında başlaması için */
+    #map {
+        padding-top: 60px; 
+    }
+    /* HEADER STYLES END */
+    
+    .interactive-icon { transition: transform 0.2s ease-out, filter 0.2s ease-out; cursor: pointer; }
+    .interactive-icon:hover { transform: translateY(-6px) scale(1.15); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+    
+    .leaflet-draw-toolbar a { width: 48px; height: 48px; line-height: 48px; }
+    .leaflet-draw-toolbar a .leaflet-draw-draw-polyline, 
+    .leaflet-draw-toolbar a .leaflet-draw-draw-marker, 
+    .leaflet-draw-toolbar a .leaflet-draw-draw-circle,
+    .leaflet-draw-toolbar a .leaflet-draw-edit-edit,
+    .leaflet-draw-toolbar a .leaflet-draw-edit-remove { background-size: 30px 30px; }
+
+    .popup-delete-button { width: 100%; padding: 8px; margin-top: 10px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-align: center; }
+    .popup-delete-button:hover { background-color: #c82333; }
+    
+    #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s 0.3s; }
+    #modal-overlay.visible { opacity: 1; visibility: visible; transition: opacity 0.3s ease; }
+    #modal-content { background: white; padding: 25px; border-radius: 8px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transform: scale(0.95); transition: transform 0.3s ease; }
+    #modal-overlay.visible #modal-content { transform: scale(1); }
+    #modal-close-btn { position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; color: #aaa; cursor: pointer; text-decoration: none; line-height: 1; }
+    #modal-close-btn:hover { color: #333; }
+    #modal-body h2 { margin-top: 0; color: #0056b3; }
+    #modal-body img { width: 100%; border-radius: 5px; margin-bottom: 15px; }
+    #modal-body p { line-height: 1.6; }
+    #modal-body strong { color: #333; }
+    .leaflet-popup-content h3 { margin: 0 0 10px; color: #0056b3; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+    .leaflet-popup-content b { color: #333; }
+    .open-detail-btn { font-size: 18px; color: #007bff; cursor: pointer; float: right; margin-left: 10px; user-select: none; }
+    .open-detail-btn:hover { color: #0056b3; }
+    .filter-toggle-button { background-color: white; border: 2px solid rgba(0,0,0,0.2); border-radius: 4px; padding: 5px 8px; cursor: pointer; font-size: 14px; font-weight: bold; color: #333; text-decoration: none; }
+    .filter-panel { display: none; position: absolute; top: 40px; left: 0; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 1px 5px rgba(0,0,0,0.65); width: 250px; }
+    .filter-tabs { display: flex; border-bottom: 1px solid #ccc; margin-bottom: 10px; }
+    .tab-btn { flex: 1; padding: 8px; background: #f1f1f1; border: none; cursor: pointer; text-align: center; border-radius: 4px 4px 0 0; }
+    .tab-btn.active { background: #fff; border: 1px solid #ccc; border-bottom: 1px solid #fff; font-weight: bold; }
+    .filter-content-pane { display: none; }
+    .filter-content-pane.active { display: block; }
+    .filter-panel h4 { margin-top: 0; margin-bottom: 10px; }
+    .filter-panel .filter-section { margin-bottom: 15px; }
+    .filter-panel .list-container { max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; }
+    .filter-panel .list-container label { display: block; }
+    #capacity-slider { margin: 20px 5px 30px 5px; }
+    #slider-values { font-weight: bold; color: #0056b3; }
+    .filter-button { width: 100%; padding: 8px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .filter-button:hover { background-color: #0056b3; }
+    .legend { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: rgba(255,255,255,0.8); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; }
+    .legend h4 { margin: 0 0 5px; }
+    .legend i { width: 18px; height: 12px; float: left; margin-right: 8px; opacity: 0.85; }
+    .leaflet-control-coordinates { background: rgba(255,255,255,0.8); padding: 5px 10px; border-radius: 5px; box-shadow: 0 0 15px rgba(0,0,0,0.2); font-family: monospace; font-size: 12px; }
+    .marker-editor input { width: calc(100% - 70px); margin-right: 5px; padding: 4px; border: 1px solid #ccc; border-radius: 3px; }
+    .marker-editor button { padding: 4px 8px; }
+    .marker-display a.edit-marker-name { font-size: 12px; margin-left: 8px; }
+  </style>
+</head>
+<body>
+
+<header class="main-header">
+    <div class="header-content">
+        <a href="https://oilmesh.github.io" class="brand-logo">OilMesh</a>
+        <nav>
+            <a href="https://oilmesh.github.io">Anasayfa</a>
+            <a href="#">Hakkında</a>
+            <a href="https://oilmesh.github.io/map" class="active">Harita</a>
+        </nav>
+    </div>
+</header>
+
+<div id="map"></div>
+<div id="modal-overlay">
+    <div id="modal-content">
+        <a href="#" id="modal-close-btn">×</a>
+        <div id="modal-body"></div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-search@3.0.9/dist/leaflet-search.min.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+<script>
+async function initMap() {
+    let refineryData, portData, pipelineData;
+    try {
+        const [refineryResponse, portResponse, pipelineResponse] = await Promise.all([
+            fetch('data/refineries.json'),
+            fetch('data/ports.json'),
+            fetch('data/pipelines.json')
+        ]);
+        if (!refineryResponse.ok || !portResponse.ok || !pipelineResponse.ok) throw new Error('Veri dosyaları yüklenemedi.');
+        refineryData = await refineryResponse.json();
+        portData = await portResponse.json();
+        pipelineData = await pipelineResponse.json();
+    } catch (error) {
+        document.getElementById('map').innerHTML = `<div style="padding: 20px; text-align: center;"><h2>Harita verileri yüklenemedi.</h2><p>Hata Detayı: ${error.message}</p><p>Lütfen sayfanın doğru bir şekilde sunulduğundan ve dosya yollarının ('data/...') doğru olduğundan emin olun.</p></div>`;
+        return;
+    }
+
+    const map = L.map('map');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
+
+    const refineryIcon = L.icon({ iconUrl: 'refinery.png', iconSize: [38, 38], iconAnchor: [19, 19], popupAnchor: [0, -19], className: 'interactive-icon' });
+    const portIcon = L.icon({ iconUrl: 'port.png', iconSize: [38, 38], iconAnchor: [19, 19], popupAnchor: [0, -19], className: 'interactive-icon' });
+    
+    let activeEditingLayer = null;
+
+    const modalOverlay = document.getElementById('modal-overlay');
+    const modalBody = document.getElementById('modal-body');
+    
+    function openModal(refineryId) {
+        const feature = refineryData.features.find(f => f.properties.id === refineryId);
+        if (!feature) return;
+        const p = feature.properties; const coords = feature.geometry.coordinates;
+        modalBody.innerHTML = `<h2>${p.name}</h2><img src="${p.image}" alt="${p.name}" onerror="this.style.display='none';"><p><strong>Konum:</strong> ${p.city}, ${p.country}</p><p><strong>Koordinatlar:</strong> ${coords[1].toFixed(5)}, ${coords[0].toFixed(5)}</p><p><strong>Katılımcılar:</strong> ${p.owner || 'Bilgi Yok'}</p><p><strong>Kapasite:</strong> ${p.capacity_bpd.toLocaleString('tr-TR')} bpd</p><p><strong>Detaylar:</strong> ${p.details || 'Detay bulunamadı.'}</p>`;
+        modalOverlay.classList.add('visible');
+    }
+    function closeModal() { modalOverlay.classList.remove('visible'); }
+    document.getElementById('modal-close-btn').addEventListener('click', (e) => { e.preventDefault(); closeModal(); });
+    modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modalOverlay.classList.contains('visible')) closeModal(); });
+
+    const refineryLayer = L.geoJSON(refineryData, {
+        pointToLayer: (feature, latlng) => L.marker(latlng, { icon: refineryIcon, title: feature.properties.name }),
+        onEachFeature: (feature, layer) => {
+            const p = feature.properties; const latlng = layer.getLatLng();
+            const popupContent = `<span title="Detayları Görüntüle" class="open-detail-btn" data-refinery-id="${p.id}">ⓘ</span><h3>${p.name}</h3><b>Konum:</b> ${p.city}, ${p.country}<br><b>Kapasite:</b> ${p.capacity_bpd.toLocaleString('tr-TR')} bpd<br><b>Koordinatlar:</b> ${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`;
+            layer.bindPopup(popupContent, { minWidth: 250 });
+        }
+    });
+    
+    map.on('popupopen', function(e) {
+        const container = e.popup._container;
+        const layer = e.popup._source;
+
+        const detailBtn = container.querySelector('.open-detail-btn');
+        if (detailBtn) {
+            L.DomEvent.on(detailBtn, 'click', function(event) {
+                L.DomEvent.stop(event);
+                openModal(this.dataset.refineryId);
+            });
+        }
+
+        const saveBtn = container.querySelector('.save-marker-name');
+        if (saveBtn) { L.DomEvent.on(saveBtn, 'click', () => { 
+            const newName = container.querySelector('.marker-name-input').value.trim() || 'İsimsiz İşaretçi'; 
+            layer.setPopupContent(getMarkerPopupContent(layer.getLatLng(), newName, false));
+        }); }
+
+        const editLink = container.querySelector('.edit-marker-name');
+        if (editLink) { L.DomEvent.on(editLink, 'click', (ev) => { 
+            L.DomEvent.stop(ev); 
+            const currentName = container.querySelector('h3').innerText; 
+            layer.setPopupContent(getMarkerPopupContent(layer.getLatLng(), currentName, true));
+        }); }
+        
+        const deleteBtn = container.querySelector('.popup-delete-button');
+        if (deleteBtn) {
+            L.DomEvent.on(deleteBtn, 'click', () => {
+                if (drawnItems.hasLayer(layer)) {
+                    drawnItems.removeLayer(layer);
+                    map.closePopup();
+                }
+            });
+        }
+    });
+
+    const refineryClusterGroup = L.markerClusterGroup(); refineryClusterGroup.addLayer(refineryLayer);
+    const portLayer = L.geoJSON(portData, {
+        pointToLayer: (feature, latlng) => L.marker(latlng, { icon: portIcon, title: feature.properties.name }),
+        onEachFeature: (feature, layer) => { layer.bindPopup(`<h3>${feature.properties.name}</h3><b>Konum:</b> ${feature.properties.city}, ${feature.properties.country}<br><b>Not:</b> ${feature.properties.notes || 'Bilgi yok'}`); }
+    });
+    const portClusterGroup = L.markerClusterGroup(); portClusterGroup.addLayer(portLayer);
+    function getNumericCapacity(capacityStr) { if (!capacityStr) return 0; const match = capacityStr.toString().match(/[\d,.]+/); return match ? parseFloat(match[0].replace(/,/g, '')) : 0; }
+    const pipelineLayer = L.geoJSON(pipelineData, {
+        style: (feature) => ({ color: feature.properties.type === "oil" ? "#C0392B" : "#3498DB", weight: feature.properties.type === 'oil' ? (getNumericCapacity(feature.properties.capacity) >= 1000000 ? 6 : 4.5) : 4, opacity: 0.85 }),
+        onEachFeature: (feature, layer) => { layer.bindPopup(`<b>${feature.properties.name}</b><br><b>Kapasite:</b> ${feature.properties.capacity || 'Belirtilmemiş'}`); }
+    });
+    
+    const searchLayer = L.layerGroup([refineryLayer, portLayer]);
+    const searchControl = new L.Control.Search({ layer: searchLayer, propertyName: 'name', marker: false, position: 'topleft', textPlaceholder: 'Ara...', zoom: 12 });
+    map.addControl(searchControl);
+    searchControl.on('search:locationfound', function(e) { if(e.layer._popup) e.layer.openPopup(); map.flyTo(e.latlng, 12); });
+
+    const overlayMaps = { "Rafineriler": refineryClusterGroup, "Limanlar": portClusterGroup, "Boru Hatları": pipelineLayer };
+    const layersControl = L.control.layers(null, overlayMaps, { position: 'bottomleft', collapsed: false }).addTo(map);
+    
+    const legend = L.control({position: 'bottomright'});
+    legend.onAdd = function (map) { const div = L.DomUtil.create('div', 'info legend'); div.innerHTML = '<h4>Hat Türü</h4><i style="background: #C0392B"></i> Petrol<br><i style="background: #3498DB"></i> Doğal Gaz'; return div; };
+    legend.addTo(map);
+
+    const CoordinatesControl = L.Control.extend({
+        onAdd: function(map) { this._div = L.DomUtil.create('div', 'leaflet-control-coordinates'); this.updateText('İmleci harita üzerinde gezdirin'); return this._div; },
+        updateText: function(text) { this._div.innerHTML = text; }
+    });
+    const coordinates = new CoordinatesControl({ position: 'bottomright' }); coordinates.addTo(map);
+    map.on('mousemove', function(e) { coordinates.updateText(`Enlem: ${e.latlng.lat.toFixed(5)} | Boylam: ${e.latlng.lng.toFixed(5)}`); });
+    map.on('mouseout', function() { coordinates.updateText('İmleci harita üzerinde gezdirin'); });
+
+    const drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+    L.drawLocal.draw.toolbar.actions.title = 'Çizimi iptal et'; L.drawLocal.draw.toolbar.actions.text = 'İptal'; L.drawLocal.draw.toolbar.finish.title = 'Çizimi bitir'; L.drawLocal.draw.toolbar.finish.text = 'Bitir'; L.drawLocal.draw.toolbar.undo.title = 'Çizilen son noktayı sil'; L.drawLocal.draw.toolbar.undo.text = 'Son noktayı sil'; L.drawLocal.draw.toolbar.buttons.polyline = 'Uzaklık ölçmek için çizgi çizin'; L.drawLocal.draw.toolbar.buttons.marker = 'İşaretçi yerleştirin'; L.drawLocal.draw.toolbar.buttons.circle = 'Daire çizin'; L.drawLocal.draw.handlers.circle.tooltip.start = 'Daire merkezini belirlemek için tıklayıp sürükleyin.'; L.drawLocal.draw.handlers.marker.tooltip.start = 'İşaretçi yerleştirmek için haritaya tıklayın.'; L.drawLocal.draw.handlers.polyline.tooltip.start = 'Çizgiye başlamak için haritaya tıklayın.'; L.drawLocal.draw.handlers.polyline.tooltip.cont = 'Bir sonraki nokta için haritaya tıklayın.'; L.drawLocal.draw.handlers.polyline.tooltip.end = 'Çizgiyi bitirmek için son noktaya çift tıklayın.'; L.drawLocal.edit.toolbar.actions.save.title = 'Değişiklikleri kaydet'; L.drawLocal.edit.toolbar.actions.save.text = 'Kaydet'; L.drawLocal.edit.toolbar.actions.cancel.title = 'Düzenlemeyi iptal et, tüm değişiklikleri geri al'; L.drawLocal.edit.toolbar.actions.cancel.text = 'İptal'; L.drawLocal.edit.toolbar.buttons.edit = 'Çizimleri düzenle'; L.drawLocal.edit.toolbar.buttons.editDisabled = 'Düzenlenecek çizim yok'; L.drawLocal.edit.toolbar.buttons.remove = 'Çizimleri sil'; L.drawLocal.edit.toolbar.buttons.removeDisabled = 'Silinecek çizim yok'; L.drawLocal.edit.handlers.edit.tooltip.text = 'Kontrol noktalarını sürükleyerek çizimi düzenleyin.'; L.drawLocal.edit.handlers.remove.tooltip.text = 'Silmek için bir çizimin üzerine tıklayın.';
+    
+    function getMarkerPopupContent(latlng, name, isEditing) {
+        const coords = `<br><b>Enlem:</b> ${latlng.lat.toFixed(5)}<br><b>Boylam:</b> ${latlng.lng.toFixed(5)}`;
+        const deleteButtonHtml = `<button class="popup-delete-button">Bu Çizimi Sil</button>`;
+        if (isEditing) {
+            return `<div class="marker-editor"><input type="text" class="marker-name-input" value="${name}" placeholder="İşaretçi adı..." autofocus><button class="save-marker-name">Kaydet</button>${coords}</div>${deleteButtonHtml}`;
+        } else {
+            return `<div class="marker-display"><h3>${name}</h3>${coords}<a href="#" class="edit-marker-name">Düzenle</a></div>${deleteButtonHtml}`;
+        }
+    }
+    
+    const drawControl = new L.Control.Draw({ position: 'topright', draw: { polyline: { shapeOptions: { color: '#000000', weight: 6 } }, marker: true, circle: true, polygon: false, rectangle: false, circlemarker: false }, edit: { featureGroup: drawnItems } });
+    map.addControl(drawControl);
+    
+    function clearActiveControls() { if (activeEditingLayer && activeEditingLayer.editing) { activeEditingLayer.editing.disable(); activeEditingLayer = null; } }
+    map.on('click', clearActiveControls);
+    
+    map.on(L.Draw.Event.CREATED, function (e) {
+        clearActiveControls();
+        const layer = e.layer;
+        const deleteButtonHtml = `<button class="popup-delete-button">Bu Çizimi Sil</button>`;
+        layer.on('click', function(ev) { L.DomEvent.stop(ev); clearActiveControls(); if (layer.editing) { layer.editing.enable(); activeEditingLayer = layer; } });
+        if (e.layerType === 'polyline') {
+            const latlngs = layer.getLatLngs(); let totalDistance = 0;
+            for (let i = 0; i < latlngs.length - 1; i++) { totalDistance += latlngs[i].distanceTo(latlngs[i+1]); }
+            layer.bindPopup(`<b>Mesafe:</b> ${(totalDistance / 1000).toFixed(2)} km` + deleteButtonHtml).openPopup();
+        } else if (e.layerType === 'circle') {
+            layer.bindPopup(`<b>Yarıçap:</b> ${(layer.getRadius() / 1000).toFixed(2)} km` + deleteButtonHtml).openPopup();
+        } else if (e.layerType === 'marker') {
+            layer.bindPopup(getMarkerPopupContent(layer.getLatLng(), 'Yeni İşaretçi', true), { minWidth: 230, closeButton: false }).openPopup();
+        }
+        drawnItems.addLayer(layer);
+    });
+
+    const allCountries = new Set(); const allCompanies = new Set(); let minCapacity = Infinity, maxCapacity = 0;
+    refineryData.features.forEach(f => {
+        allCountries.add(f.properties.country);
+        if (f.properties.owner) { f.properties.owner.split(',').forEach(owner => { const cleanOwner = owner.trim().replace(/\s*\(.*\)/, ''); if (cleanOwner) allCompanies.add(cleanOwner); }); }
+        minCapacity = Math.min(minCapacity, f.properties.capacity_bpd); maxCapacity = Math.max(maxCapacity, f.properties.capacity_bpd);
+    });
+    portData.features.forEach(f => allCountries.add(f.properties.country));
+    
+    const filterControl = L.control({ position: 'topleft' });
+    filterControl.onAdd = function(map) { 
+        const container = L.DomUtil.create('div');
+        container.innerHTML = `<a href="#" id="filter-toggle-button" class="filter-toggle-button" title="Filtre">☰ Filtre</a><div id="filter-panel" class="filter-panel"><div class="filter-tabs"><button id="country-tab-btn" class="tab-btn active">Ülkeye Göre</button><button id="company-tab-btn" class="tab-btn">Şirkete Göre</button></div><div id="country-filter-content" class="filter-content-pane active"><div class="list-container" id="country-list-div"></div></div><div id="company-filter-content" class="filter-content-pane"><div class="list-container" id="company-list-div"></div></div><div class="filter-section" style="margin-top: 15px;"><h4>Rafineri Kapasitesi (bpd)</h4><div id="capacity-slider"></div><div id="slider-values"></div></div><button id="reset-filters-btn" class="filter-button" style="background-color: #6c757d; margin-top: 5px;">Sıfırla</button></div>`; 
+        L.DomEvent.on(container.querySelector('#filter-toggle-button'), 'click', (e) => { const panel = container.querySelector('#filter-panel'); panel.style.display = panel.style.display === 'none' || panel.style.display === '' ? 'block' : 'none'; L.DomEvent.stop(e); }); 
+        L.DomEvent.disableClickPropagation(container); return container; 
+    };
+    filterControl.addTo(map);
+
+    function setupTabSwitching() {
+        const countryTabBtn = document.getElementById('country-tab-btn'); const companyTabBtn = document.getElementById('company-tab-btn'); const countryPane = document.getElementById('country-filter-content'); const companyPane = document.getElementById('company-filter-content');
+        countryTabBtn.addEventListener('click', () => { countryTabBtn.classList.add('active'); companyTabBtn.classList.remove('active'); countryPane.classList.add('active'); companyPane.classList.remove('active'); });
+        companyTabBtn.addEventListener('click', () => { companyTabBtn.classList.add('active'); countryTabBtn.classList.remove('active'); companyPane.classList.add('active'); countryPane.classList.remove('active'); });
+    }
+    setupTabSwitching();
+
+    const countryListDiv = document.getElementById('country-list-div');
+    [...allCountries].sort().forEach(item => { const label = document.createElement('label'); label.innerHTML = `<input type="checkbox" class="country-checkbox" value="${item}"> ${item}`; label.querySelector('input').addEventListener('change', applyFilters); countryListDiv.appendChild(label); });
+    const companyListDiv = document.getElementById('company-list-div');
+    [...allCompanies].sort().forEach(item => { const label = document.createElement('label'); label.innerHTML = `<input type="checkbox" class="company-checkbox" value="${item}"> ${item}`; label.querySelector('input').addEventListener('change', applyFilters); companyListDiv.appendChild(label); });
+    
+    const slider = document.getElementById('capacity-slider');
+    noUiSlider.create(slider, { start: [minCapacity, maxCapacity], connect: true, range: { 'min': minCapacity, 'max': maxCapacity }, step: 1000, format: { to: v => Math.round(v), from: v => Number(v) } });
+    slider.noUiSlider.on('update', v => { document.getElementById('slider-values').innerHTML = `${v[0].toLocaleString('tr-TR')} - ${v[1].toLocaleString('tr-TR')}`; });
+    slider.noUiSlider.on('set', applyFilters);
+    
+    document.getElementById('reset-filters-btn').addEventListener('click', () => { document.querySelectorAll('.country-checkbox:checked, .company-checkbox:checked').forEach(cb => cb.checked = false); slider.noUiSlider.set([minCapacity, maxCapacity]); applyFilters(); document.getElementById('filter-panel').style.display = 'none'; });
+
+    function applyFilters() {
+        const selectedCountries = [...document.querySelectorAll('.country-checkbox:checked')].map(cb => cb.value);
+        const selectedCompanies = [...document.querySelectorAll('.company-checkbox:checked')].map(cb => cb.value);
+        const capacityRange = slider.noUiSlider.get();
+        const checkCompanyMatch = (ownerString, companies) => { if (companies.length === 0) return true; if (!ownerString) return false; return companies.some(company => new RegExp(`\\b${company.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i').test(ownerString)); };
+        const filteredRefineries = refineryData.features.filter(f => (selectedCountries.length === 0 || selectedCountries.includes(f.properties.country)) && (f.properties.capacity_bpd >= capacityRange[0] && f.properties.capacity_bpd <= capacityRange[1]) && checkCompanyMatch(f.properties.owner, selectedCompanies));
+        refineryClusterGroup.clearLayers(); refineryClusterGroup.addLayer(L.geoJSON({type:"FeatureCollection", features:filteredRefineries}, {pointToLayer: refineryLayer.options.pointToLayer, onEachFeature: refineryLayer.options.onEachFeature}));
+        const filteredPorts = portData.features.filter(f => selectedCountries.length === 0 || selectedCountries.includes(f.properties.country));
+        portClusterGroup.clearLayers(); portClusterGroup.addLayer(L.geoJSON({type:"FeatureCollection", features:filteredPorts}, {pointToLayer: portLayer.options.pointToLayer, onEachFeature: portLayer.options.onEachFeature}));
+        const coordToCountry = {}; const coordToCompany = {};
+        [...refineryData.features, ...portData.features].forEach(f => { const coordKey = f.geometry.coordinates.join(','); coordToCountry[coordKey] = f.properties.country; if (f.properties.owner) { coordToCompany[coordKey] = f.properties.owner; } });
+        const filteredPipelines = pipelineData.features.filter(f => {
+            const coords = f.geometry.coordinates; const startCoordKey = coords[0].join(','); const endCoordKey = coords[coords.length - 1].join(',');
+            const countryMatch = selectedCountries.length === 0 || selectedCountries.includes(coordToCountry[startCoordKey]) || selectedCountries.includes(coordToCountry[endCoordKey]);
+            const companyMatch = selectedCompanies.length === 0 || checkCompanyMatch(coordToCompany[startCoordKey], selectedCompanies) || checkCompanyMatch(coordToCompany[endCoordKey], selectedCompanies);
+            return countryMatch && companyMatch;
+        });
+        pipelineLayer.clearLayers(); pipelineLayer.addData({type: "FeatureCollection", features: filteredPipelines});
+        updateUrlHash();
+    }
+
+    let updatingUrl = false;
+    function updateUrlHash() {
+        if (updatingUrl) return;
+        const center = map.getCenter(); const zoom = map.getZoom(); const layers = [];
+        if (map.hasLayer(refineryClusterGroup)) layers.push('R'); if (map.hasLayer(portClusterGroup)) layers.push('P'); if (map.hasLayer(pipelineLayer)) layers.push('L');
+        const selectedCountries = [...document.querySelectorAll('.country-checkbox:checked')].map(cb => cb.value);
+        const selectedCompanies = [...document.querySelectorAll('.company-checkbox:checked')].map(cb => cb.value);
+        const capacityRange = slider.noUiSlider.get();
+        const params = new URLSearchParams();
+        params.set('z', zoom); params.set('lat', center.lat.toFixed(5)); params.set('lng', center.lng.toFixed(5));
+        if (layers.length < 3) params.set('lyr', layers.join(','));
+        if (selectedCountries.length > 0) params.set('co', selectedCountries.join(','));
+        if (selectedCompanies.length > 0) params.set('com', selectedCompanies.join(','));
+        if (capacityRange[0] > minCapacity || capacityRange[1] < maxCapacity) { params.set('cap', `${capacityRange[0]},${capacityRange[1]}`); }
+        history.replaceState(null, '', '#' + params.toString());
+    }
+    
+    function applyStateFromUrl() {
+        try {
+            const params = new URLSearchParams(window.location.hash.substring(1));
+            if (params.toString() === '') return false;
+            updatingUrl = true;
+            const zoom = params.get('z'); const lat = params.get('lat'); const lng = params.get('lng');
+            if (zoom && lat && lng) { map.setView([parseFloat(lat), parseFloat(lng)], parseInt(zoom)); }
+            const visibleLayers = params.get('lyr')?.split(',') || ['R', 'P', 'L'];
+            if (!visibleLayers.includes('R')) map.removeLayer(refineryClusterGroup); if (!visibleLayers.includes('P')) map.removeLayer(portClusterGroup); if (!visibleLayers.includes('L')) map.removeLayer(pipelineLayer);
+            const countries = params.get('co')?.split(',');
+            if (countries) { document.querySelectorAll('.country-checkbox').forEach(cb => { cb.checked = countries.includes(cb.value); }); }
+            const companies = params.get('com')?.split(',');
+            if (companies) { document.querySelectorAll('.company-checkbox').forEach(cb => { cb.checked = companies.includes(cb.value); }); }
+            const capacity = params.get('cap')?.split(',').map(Number);
+            if (capacity && capacity.length === 2) { slider.noUiSlider.set(capacity); }
+            applyFilters();
+            return true;
+        } catch (error) {
+            console.error("URL'den durum yüklenirken hata oluştu:", error);
+            return false;
+        } finally {
+            updatingUrl = false;
+        }
+    }
+
+    refineryClusterGroup.addTo(map); portClusterGroup.addTo(map); pipelineLayer.addTo(map);
+    map.on('moveend layeradd layerremove', updateUrlHash);
+    if (!applyStateFromUrl()) { map.setView([49.5, 10.5], 5); }
+}
+initMap();
+</script>
+
+</body>
+</html>
+
