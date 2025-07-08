@@ -1,0 +1,118 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [16.4419, 48.1103] },
+      "properties": {
+        "id": "schwechat",
+        "name": "Schwechat Rafinerisi",
+        "city": "Schwechat",
+        "country": "Avusturya",
+        "capacity_bpd": 196000,
+        "image": "images/schwechat-refinery.jpg",
+        "owner": "OMV Group (100%)",
+        "details": "1958'de kurulan Schwechat Rafinerisi, Orta Avrupa'nın en büyük ve en modern tesislerinden biridir. Haziran 2024'te OMV, tesiste 200 milyon Euro'luk bir yatırımla biyokütleyi (atık yemeklik yağ gibi) yenilenebilir dizel bileşenlerine dönüştüren bir ortak işleme ünitesini faaliyete geçirmiştir. Bu teknoloji, OMV'nin karbon ayak izini yılda 360.000 tona kadar azaltmasını sağlayacaktır. Ayrıca, tesiste yıllık 1.500 ton yeşil hidrojen üretim kapasiteli, Avusturya'nın en büyük 10 MW'lık elektrolizör tesisi ve plastik atıkları geri dönüştüren ReOil® kimyasal geri dönüşüm ünitesi bulunmaktadır. Bu girişimler, OMV'nin 2050 yılına kadar net sıfır emisyona ulaşma stratejisinin bir parçasıdır."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [8.3516, 49.0315] },
+      "properties": {
+        "id": "miro",
+        "name": "MiRO Rafinerisi",
+        "city": "Karlsruhe",
+        "country": "Almanya",
+        "capacity_bpd": 310000,
+        "image": "images/miro1.png",
+        "owner": "Shell (32.25%), Esso (ExxonMobil) (25%), Rosneft (24%), Phillips 66 (18.75%)",
+        "details": "Mineraloelraffinerie Oberrhein (MiRO), Almanya'nın en büyük yakıt rafinerisidir. Tesisin mülkiyet yapısı son dönemde hareketlidir; Rosneft'in %24'lük hissesi Ukrayna'daki gelişmeler sonrası Alman hükümetinin fiducia yönetimi altındadır ve diğer ortakların hisse satış girişimleri sürmektedir."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [4.8475, 45.6736] },
+      "properties": {
+        "id": "feyzin",
+        "name": "Feyzin Rafinerisi",
+        "city": "Lyon",
+        "country": "Fransa",
+        "capacity_bpd": 119000,
+        "image": "images/placeholder.jpg",
+        "owner": "TotalEnergies (100%)",
+        "details": "Lyon yakınlarındaki bu entegre petrokimya tesisi, geleneksel yakıtların yanı sıra kimyasallar için de ham madde üretir. Stratejik olarak TotalEnergies, 2030 yılına kadar Feyzin dahil altı Avrupa rafinerisindeki hidrojen kullanımını karbondan arındırmak için büyük bir adım atmıştır. Şirket, bu tesislerdeki mevcut hidrojenin yerine geçmek üzere yıllık 500.000 ton yeşil hidrojen tedariki için uluslararası bir ihale başlatmıştır. Bu girişim, şirketin operasyonlarından kaynaklanan sera gazı emisyonlarını 2030'a kadar %40 azaltma hedefinin önemli bir parçasıdır."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [19.7055, 52.5513] },
+      "properties": {
+        "id": "plock",
+        "name": "Płock Rafinerisi",
+        "city": "Płock",
+        "country": "Polonya",
+        "capacity_bpd": 270000,
+        "image": "images/plock1.png",
+        "owner": "PKN Orlen (100%)",
+        "details": "Polonya'nın en büyük rafinerisi olan Płock, Druzhba boru hattı üzerindeki konumuyla ülkenin enerji güvenliğinde kilit rol oynar. PKN Orlen, tesiste büyük modernizasyon projeleri yürütmektedir. Yakın zamanda tamamlanan Olefin II modernizasyonu ile petrokimya ana maddelerinin üretim kapasitesi artırılmıştır. Şirket, aynı zamanda tesiste yenilikçi bir biyoyakıt bileşeni olan hidro-işlenmiş bitkisel yağ (HVO) üretimi için de yatırım yapmaktadır."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [14.2842, 53.5473] },
+      "properties": {
+        "id": "pck",
+        "name": "PCK Raffinerie GmbH",
+        "city": "Schwedt (Oder)",
+        "country": "Almanya",
+        "capacity_bpd": 200000,
+        "image": "images/pck1.png",
+        "owner": "Rosneft (54.17%), Shell (37.5%), Eni (8.33%)",
+        "details": "Almanya'nın doğusundaki bu stratejik rafineri, Rus ham petrolüne bağımlılığın sona ermesinden bu yana büyük bir dönüşüm geçirmektedir. Rosneft'in çoğunluk hissesi Alman hükümetinin fiducia yönetimi altındadır. Shell, kendi hissesini Prax Group'a satmak için anlaşmıştır. Tesis, petrolünü Rostock limanı, Polonya ve Kazakistan'dan tedarik ederek %80'in üzerinde kapasiteyle çalışmakta ve 'yeşil rafineri' olma yolunda ilerlemektedir."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [11.7408, 48.6453] },
+      "properties": {
+        "id": "bayernoil",
+        "name": "Bayernoil Raffinerie",
+        "city": "Vohburg an der Donau",
+        "country": "Almanya",
+        "capacity_bpd": 226000,
+        "image": "images/bayernoil1.png",
+        "owner": "Varo Energy (51.4%), Rosneft (28.6%), Eni (20%)",
+        "details": "Vohburg ve Neustadt'taki iki tesisten oluşan Bayernoil kompleksi, Bavyera ve Kuzey Avusturya'nın yakıt ihtiyacını karşılar. Rosneft'in hissesi de Alman hükümetinin fiducia yönetimi altındadır. Tesiste son dönemde bazı operasyonel olaylar yaşanmıştır."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [8.9317, 54.1976] },
+      "properties": {
+        "id": "heide",
+        "name": "Heide Raffinerie",
+        "city": "Heide",
+        "country": "Almanya",
+        "capacity_bpd": 90000,
+        "image": "images/heide1.png",
+        "owner": "Klesch Group (100%)",
+        "details": "Kuzey Denizi kıyısındaki bu rafineri, yeşil enerjiye dönüşüm konusunda öncü bir rol oynamayı hedeflemektedir. Rüzgar enerjisinin bol olduğu bir bölgede yer alması, tesise yeşil hidrojen üretimi için büyük bir potansiyel sunmaktadır. 'Westküste 100' gibi büyük ölçekli yeşil hidrojen projelerinin merkezinde yer almakta ve e-metanol ile sürdürülebilir havacılık yakıtı (SAF) üretme vizyonunu sürdürmektedir."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [12.7309, 48.1877] },
+      "properties": {
+        "id": "omv_burghausen",
+        "name": "OMV Raffinerie Burghausen",
+        "city": "Burghausen",
+        "country": "Almanya",
+        "capacity_bpd": 79000,
+        "image": "images/omv_burghausen1.png",
+        "owner": "OMV (100%)",
+        "details": "Salzach Nehri kıyısındaki bu OMV tesisi, özellikle petrokimya ürünleri üzerine odaklanmıştır. OMV'nin 2050 net sıfır emisyon hedefi doğrultusunda tesis, sürdürülebilir ürünlerin üretimini artırmaktadır. 2024 yılında, üretilen temel kimyasalların çevresel etkilerini değerlendirmek üzere kapsamlı bir Yaşam Döngüsü Değerlendirmesi (LCA) yapılmıştır. Tesis, yenilenebilir ham maddelerden düşük karbon ayak izine sahip ürünler tedarik etmeyi planlamaktadır."
+      }
+    }
+  ]
+}
+

@@ -1,0 +1,15 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [13.7592, 45.6481] },
+      "properties": { "name": "Trieste Limanı (SIOT Terminali)", "city": "Trieste", "country": "İtalya", "notes": "Transalpine Boru Hattı'nın (TAL) başlangıç noktasıdır." }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [4.1432, 51.9482] },
+      "properties": { "name": "Rotterdam Limanı", "city": "Rotterdam", "country": "Hollanda", "notes": "Avrupa'nın en büyük petrol ve ürün terminalidir." }
+    }
+  ]
+}
