@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="utf-8" />
-  <title>OilMesh | Rafineri, Liman ve Boru Hattı Haritası</title>
+  <title> OilMesh </title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -39,13 +39,13 @@
     .brand-logo {
         font-size: 24px;
         font-weight: bold;
-        color: #007bff; /* DEĞİŞTİRİLDİ */
+        color: #007bff; 
         text-decoration: none;
     }
     .main-header nav a {
         margin-left: 20px;
         text-decoration: none;
-        color: #ecf0f1; /* DEĞİŞTİRİLDİ */
+        color: #ecf0f1; 
         font-size: 16px;
         padding: 5px 10px;
         border-radius: 5px;
@@ -60,7 +60,6 @@
     }
 
     .leaflet-top { top: 70px; }
-    
     
     .interactive-icon { transition: transform 0.2s ease-out, filter 0.2s ease-out; cursor: pointer; }
     .interactive-icon:hover { transform: translateY(-6px) scale(1.15); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
@@ -330,7 +329,7 @@ async function initMap() {
     
     document.getElementById('reset-filters-btn').addEventListener('click', () => { document.querySelectorAll('.country-checkbox:checked, .company-checkbox:checked').forEach(cb => cb.checked = false); slider.noUiSlider.set([minCapacity, maxCapacity]); applyFilters(); document.getElementById('filter-panel').style.display = 'none'; });
 
-    // --- applyFilters FONKSİYONU DEĞİŞTİRİLDİ ---
+
     function applyFilters() {
         const selectedCountries = [...document.querySelectorAll('.country-checkbox:checked')].map(cb => cb.value);
         const selectedCompanies = [...document.querySelectorAll('.company-checkbox:checked')].map(cb => cb.value);
@@ -341,6 +340,7 @@ async function initMap() {
             return companies.some(company => new RegExp(`\\b${company.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i').test(ownerString));
         };
 
+
         const filteredRefineries = refineryData.features.filter(f => 
             (selectedCountries.length === 0 || selectedCountries.includes(f.properties.country)) &&
             (f.properties.capacity_bpd >= capacityRange[0] && f.properties.capacity_bpd <= capacityRange[1]) &&
@@ -350,11 +350,13 @@ async function initMap() {
             selectedCountries.length === 0 || selectedCountries.includes(f.properties.country)
         );
 
+ 
         refineryClusterGroup.clearLayers();
         refineryClusterGroup.addLayer(L.geoJSON({type:"FeatureCollection", features:filteredRefineries}, {pointToLayer: refineryLayer.options.pointToLayer, onEachFeature: refineryLayer.options.onEachFeature}));
         
         portClusterGroup.clearLayers();
         portClusterGroup.addLayer(L.geoJSON({type:"FeatureCollection", features:filteredPorts}, {pointToLayer: portLayer.options.pointToLayer, onEachFeature: portLayer.options.onEachFeature}));
+
 
         const coordToCountry = {};
         const coordToCompany = {};
@@ -366,6 +368,7 @@ async function initMap() {
                 coordToCompany[coordKey] = f.properties.owner;
             }
         });
+
 
         const filteredPipelines = pipelineData.features.filter(f => {
             const coords = f.geometry.coordinates;
@@ -435,3 +438,4 @@ initMap();
 
 </body>
 </html>
+
