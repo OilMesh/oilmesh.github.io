@@ -39,13 +39,13 @@
     .brand-logo {
         font-size: 24px;
         font-weight: bold;
-        color: #0056b3;
+        color: #007bff; /* DEĞİŞTİRİLDİ */
         text-decoration: none;
     }
     .main-header nav a {
         margin-left: 20px;
         text-decoration: none;
-        color: #333;
+        color: #ecf0f1; /* DEĞİŞTİRİLDİ */
         font-size: 16px;
         padding: 5px 10px;
         border-radius: 5px;
@@ -330,24 +330,57 @@ async function initMap() {
     
     document.getElementById('reset-filters-btn').addEventListener('click', () => { document.querySelectorAll('.country-checkbox:checked, .company-checkbox:checked').forEach(cb => cb.checked = false); slider.noUiSlider.set([minCapacity, maxCapacity]); applyFilters(); document.getElementById('filter-panel').style.display = 'none'; });
 
+    // --- applyFilters FONKSİYONU DEĞİŞTİRİLDİ ---
     function applyFilters() {
         const selectedCountries = [...document.querySelectorAll('.country-checkbox:checked')].map(cb => cb.value);
         const selectedCompanies = [...document.querySelectorAll('.company-checkbox:checked')].map(cb => cb.value);
         const capacityRange = slider.noUiSlider.get();
-        const checkCompanyMatch = (ownerString, companies) => { if (companies.length === 0) return true; if (!ownerString) return false; return companies.some(company => new RegExp(`\\b${company.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i').test(ownerString)); };
-        const filteredRefineries = refineryData.features.filter(f => (selectedCountries.length === 0 || selectedCountries.includes(f.properties.country)) && (f.properties.capacity_bpd >= capacityRange[0] && f.properties.capacity_bpd <= capacityRange[1]) && checkCompanyMatch(f.properties.owner, selectedCompanies));
-        refineryClusterGroup.clearLayers(); refineryClusterGroup.addLayer(L.geoJSON({type:"FeatureCollection", features:filteredRefineries}, {pointToLayer: refineryLayer.options.pointToLayer, onEachFeature: refineryLayer.options.onEachFeature}));
-        const filteredPorts = portData.features.filter(f => selectedCountries.length === 0 || selectedCountries.includes(f.properties.country));
-        portClusterGroup.clearLayers(); portClusterGroup.addLayer(L.geoJSON({type:"FeatureCollection", features:filteredPorts}, {pointToLayer: portLayer.options.pointToLayer, onEachFeature: portLayer.options.onEachFeature}));
-        const coordToCountry = {}; const coordToCompany = {};
-        [...refineryData.features, ...portData.features].forEach(f => { const coordKey = f.geometry.coordinates.join(','); coordToCountry[coordKey] = f.properties.country; if (f.properties.owner) { coordToCompany[coordKey] = f.properties.owner; } });
+        const checkCompanyMatch = (ownerString, companies) => {
+            if (companies.length === 0) return true;
+            if (!ownerString) return false;
+            return companies.some(company => new RegExp(`\\b${company.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i').test(ownerString));
+        };
+
+        const filteredRefineries = refineryData.features.filter(f => 
+            (selectedCountries.length === 0 || selectedCountries.includes(f.properties.country)) &&
+            (f.properties.capacity_bpd >= capacityRange[0] && f.properties.capacity_bpd <= capacityRange[1]) &&
+            checkCompanyMatch(f.properties.owner, selectedCompanies)
+        );
+        const filteredPorts = portData.features.filter(f => 
+            selectedCountries.length === 0 || selectedCountries.includes(f.properties.country)
+        );
+
+        refineryClusterGroup.clearLayers();
+        refineryClusterGroup.addLayer(L.geoJSON({type:"FeatureCollection", features:filteredRefineries}, {pointToLayer: refineryLayer.options.pointToLayer, onEachFeature: refineryLayer.options.onEachFeature}));
+        
+        portClusterGroup.clearLayers();
+        portClusterGroup.addLayer(L.geoJSON({type:"FeatureCollection", features:filteredPorts}, {pointToLayer: portLayer.options.pointToLayer, onEachFeature: portLayer.options.onEachFeature}));
+
+        const coordToCountry = {};
+        const coordToCompany = {};
+        const allVisibleTerminals = [...filteredRefineries, ...filteredPorts];
+        allVisibleTerminals.forEach(f => {
+            const coordKey = f.geometry.coordinates.join(',');
+            coordToCountry[coordKey] = f.properties.country;
+            if (f.properties.owner) {
+                coordToCompany[coordKey] = f.properties.owner;
+            }
+        });
+
         const filteredPipelines = pipelineData.features.filter(f => {
-            const coords = f.geometry.coordinates; const startCoordKey = coords[0].join(','); const endCoordKey = coords[coords.length - 1].join(',');
+            const coords = f.geometry.coordinates;
+            const startCoordKey = coords[0].join(',');
+            const endCoordKey = coords[coords.length - 1].join(',');
+            
             const countryMatch = selectedCountries.length === 0 || selectedCountries.includes(coordToCountry[startCoordKey]) || selectedCountries.includes(coordToCountry[endCoordKey]);
             const companyMatch = selectedCompanies.length === 0 || checkCompanyMatch(coordToCompany[startCoordKey], selectedCompanies) || checkCompanyMatch(coordToCompany[endCoordKey], selectedCompanies);
+
             return countryMatch && companyMatch;
         });
-        pipelineLayer.clearLayers(); pipelineLayer.addData({type: "FeatureCollection", features: filteredPipelines});
+
+        pipelineLayer.clearLayers();
+        pipelineLayer.addData({type: "FeatureCollection", features: filteredPipelines});
+        
         updateUrlHash();
     }
 
@@ -402,4 +435,3 @@ initMap();
 
 </body>
 </html>
-
