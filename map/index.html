@@ -18,9 +18,9 @@
 
     /* HEADER STYLES */
     .main-header {
-        background-color: #ffffff;
+        background-color: #34495e;
         padding: 0 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-bottom: 1px solid #4a627a;
         position: fixed; /* Sabit durması için */
         top: 0;
         left: 0;
@@ -51,14 +51,16 @@
         border-radius: 5px;
         transition: background-color 0.2s;
     }
-    .main-header nav a:hover { background-color: #f0f0f0; }
-    .main-header nav a.active { font-weight: bold; color: #0056b3; }
+    .main-header nav a:hover { background-color: #4a627a; }
+    .main-header nav a.active { font-weight: bold; color: #ffffff; }
     
     /* Haritanın menünün altında başlaması için */
     #map {
         padding-top: 60px; 
     }
-    /* HEADER STYLES END */
+
+    .leaflet-top { top: 70px; }
+    
     
     .interactive-icon { transition: transform 0.2s ease-out, filter 0.2s ease-out; cursor: pointer; }
     .interactive-icon:hover { transform: translateY(-6px) scale(1.15); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
@@ -115,11 +117,10 @@
 
 <header class="main-header">
     <div class="header-content">
-        <a href="https://oilmesh.github.io" class="brand-logo">OilMesh</a>
+        <a href="https://oilmesh.vercel.app" class="brand-logo">OilMesh</a>
         <nav>
-            <a href="https://oilmesh.github.io">Anasayfa</a>
-            <a href="#">Hakkında</a>
-            <a href="https://oilmesh.github.io/map" class="active">Harita</a>
+            <a href="https://oilmesh.vercel.app/">Anasayfa</a>
+            <a href="https://oilmesh.vercel.app/map" class="active">Harita</a>
         </nav>
     </div>
 </header>
